@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const DB = 'mongodb+srv://test1:test@WysOwl.lw4e192.mongodb.net/?retryWrites=true&w=majority';
+require('dotenv').config();
+const DB = process.env.Mongo_db;
 mongoose.connect(DB);
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'error in connecting to the databse'));

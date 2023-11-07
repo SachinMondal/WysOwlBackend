@@ -1,4 +1,5 @@
 const passport = require('passport');
+require('dotenv').config();
 const GoogleStratergy = require('passport-google-oauth').OAuth2Strategy;
 const crypto = require('crypto');
 const Admin = require('../modals/AdminModal');
@@ -8,9 +9,9 @@ const User = require('../modals/UserModal');
 
 //passport using the google stratergy
 passport.use(new GoogleStratergy({
-    clientID: "175596792337-edf3a7l6ke6omfrbj5h7mu853hvpln3r.apps.googleusercontent.com",
-    clientSecret: "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",
-    callbackURL: "http://localhost:5000/users/auth/google/callback",
+    clientID: process.env.Google_Client_id,
+    clientSecret: process.env.Google_Client_Secreet,
+    callbackURL: process.env.Google_Callback_url,
 },
     function (accessToken, refreshToken, profile, done) {
         const email = profile.emails[0].value;

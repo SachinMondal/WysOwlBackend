@@ -1,4 +1,5 @@
 const passport = require("passport");
+require('dotenv').config();
 const JWTStrategy = require('passport-jwt').Strategy;
 const ExtractJWT = require("passport-jwt").ExtractJwt;
 const Admin = require('../modals/AdminModal');
@@ -6,7 +7,7 @@ const User = require('../modals/UserModal');
 
 let opts = {
     jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-    secretOrKey: 'secret'
+    secretOrKey: process.env.secret_key,
 };
 
 passport.use(new JWTStrategy(opts, async function (jwtPayload, done) {

@@ -1,13 +1,15 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
-const accountSid = "AC82b089df8fc618e27e9407fdc5c6ed6c";
-const authToken = "44b8ec0850bcb87366c219778863fb31";
-const verifySid = "VA7e0c53064c17aeec3a0d3f46c902dc05";
+const accountSid = process.env.ACCOUNT_SID;
+const authToken = process.env.AUTH_TOKEN;
+const verifySid = process.env.VERIFY_SID;
 const client = require("twilio")(accountSid, authToken);
 
 // Route to send OTP
 router.post('/sendOTP', async (req, res) => {
     const { to } = req.body;
+    console.log(to);
     try {
         // Send OTP via SMS
         const sendVerification = await client.verify.v2.services(verifySid).verifications.create({ to: to, channel: "sms" });
