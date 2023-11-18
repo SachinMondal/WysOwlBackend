@@ -12,6 +12,7 @@ router.post('/sendOTP', async (req, res) => {
     console.log(to);
     try {
         // Send OTP via SMS
+
         const sendVerification = await client.verify.v2.services(verifySid).verifications.create({ to: to, channel: "sms" });
         console.log(sendVerification.status);
 
