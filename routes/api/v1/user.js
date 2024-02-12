@@ -46,7 +46,7 @@ router.post('/login', (req, res) => {
 
 
 ////////////////////USER FEATURES//////////////////////////////////
-router.post('/getALLSections',
+router.get('/getALLSections',
     // passport.checkAuthentication,
     UserFunction.getALLSections);
 router.post('/getALLUnits/:sectionId',

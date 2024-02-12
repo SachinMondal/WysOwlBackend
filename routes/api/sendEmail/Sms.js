@@ -13,7 +13,7 @@ router.post('/sendOTP', async (req, res) => {
     try {
         // Send OTP via SMS
 
-        const sendVerification = await client.verify.v2.services(verifySid).verifications.create({ to: to, channel: "sms" });
+        const sendVerification = await client.verify.v2.services(verifySid).verifications.create({ to: "+91" + to, channel: "sms" });
         console.log(sendVerification.status);
 
         res.status(200).json({ message: "OTP sent successfully" });
@@ -26,16 +26,16 @@ router.post('/sendOTP', async (req, res) => {
 // Route to verify OTP
 router.post('/verifyOTP', async (req, res) => {
     const { to, otpCode } = req.body;
-
+    console.log(to, otpCode);
     try {
         // Verify OTP
-        const verifyOTP = await client.verify.v2.services(verifySid).verificationChecks.create({ to: to, code: otpCode });
+        const verifyOTP = await client.verify.v2.services(verifySid).verificationChecks.create({ to: "+91" + to, code: otpCode });
         console.log(verifyOTP.status);
 
         if (verifyOTP.status === 'approved') {
-            res.status(200).json({ message: "OTP verified successfully" });
+            res.status(200).json({ message: "OTP verified successfully", statusCode: '200' });
         } else {
-            res.status(401).json({ error: "OTP verification failed" });
+            res.status(401).json({ error: "OTP verification failed", statusCode: '401' });
         }
     } catch (error) {
         console.error(error);

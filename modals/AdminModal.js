@@ -34,6 +34,10 @@ const adminSchema = new mongoose.Schema({
     age: {
         type: Number,
         required: true
+    },
+    region: {
+        type: String,
+        required: true
     }
 });
 

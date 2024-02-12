@@ -34,51 +34,73 @@ module.exports.signup = async function (req, res) {
 }
 module.exports.create = async function (req, res) {
     try {
-        let { Email, Password } = req.body;
-        if (!Email || !Password) {
+        let { Email, MobileNumber, Password } = req.body;
+
+        if ((!Email && !MobileNumber) || !Password) {
             return res.status(400).json({
                 success: false,
-                message: "No email or password",
+                message: "No email/phone number or password provided",
+                statusCode: 400
             });
         }
-        const user = await User.findOne({ Email: Email });
+
+        let user;
+        if (Email) {
+            console.log('1');
+            user = await User.findOne({ Email: Email });
+        } else if (MobileNumber) {
+            console.log('2');
+            user = await User.findOne({ MobileNumber: MobileNumber });
+        }
+        console.log(user);
         if (!user) {
             return res.status(401).json({
                 success: false,
-                message: "Invalid Credentials"
+                message: "Invalid Credentials",
+                statusCode: 401
+
             });
         }
-        const isMatch = await User.matchPassword(Password);
+
+        const isMatch = await user.matchPassword(Password);
+
         if (!isMatch) {
             return res.status(401).json({
                 success: false,
-                message: "invalid credentials"
+                message: "Invalid Credentials",
+                statusCode: 401
             });
         }
-        const token = User.getSignedJwtToken();
+
+        const token = user.getSignedJwtToken();
         console.log(token);
+
         res.status(200).json({
             success: true,
-            message: `Log in successfully ~ keep the token safe ${User.Name}`
+            message: `Log in successfully ~ keep the token safe ${User.Name}`,
+            statusCode: 200
         });
+
     } catch (err) {
         console.log(err);
         res.status(400).json({
             success: false,
-            message: "Error Occured",
-        })
+            message: "Error Occurred",
+            statusCode: 400
+        });
     }
 }
 
+
 module.exports.createSession = async function (req, res) {
     try {
-        const user = req.user; // Assuming req.user is the authenticated user object
+        const user = req.user;
 
-        // Set a cookie named 'user_id' with the user's ID as the value
+
         res.cookie('user_id', user._id, {
-            httpOnly: true, // Prevents JavaScript access to the cookie
-            maxAge: 24 * 60 * 60 * 1000, // Cookie will expire in 1 day (optional)
-            // Other cookie options can be added here
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000,
+
         });
 
         return res.status(200).json({
@@ -128,7 +150,7 @@ module.exports.update = async (req, res) => {
         Password: req.body.Password,
     }
     try {
-        // Use req.user._id instead of req.User._id
+
         if (req.user._id == userID) {
             const updatedUser = await User.findByIdAndUpdate(userID, updatedData, {
                 new: true,
@@ -178,6 +200,6 @@ module.exports.logout = async function (req, res, next) {
         success: true,
         message: `Successfully logout ~ ${req.Name}`
     })
-    // return res.redirect('/');
+
 
 }

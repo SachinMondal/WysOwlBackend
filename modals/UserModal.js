@@ -13,18 +13,22 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         trim: true,
     },
-    dob: {
-        type: Number,
-        required: [true, 'Age is Required']
-    },
     Password: {
         type: String,
         minlength: 6,
         required: [true, 'Password Is Required'],
     },
+    age: {
+        type: String,
+        required: true
+    },
     MobileNumber: {
         type: Number,
         maxlength: 10,
+    },
+    region: {
+        type: String,
+
     },
     Photo: {
         dataBuffer: {
