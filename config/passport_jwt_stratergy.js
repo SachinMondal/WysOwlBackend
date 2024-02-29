@@ -1,32 +1,17 @@
-const passport = require("passport");
-require('dotenv').config();
-const JWTStrategy = require('passport-jwt').Strategy;
-const ExtractJWT = require("passport-jwt").ExtractJwt;
-const Admin = require('../modals/AdminModal');
-const User = require('../modals/UserModal');
+const jwt = require('jsonwebtoken');
+require('dotenv').config()
+const SECRET_KEY = "s7bDSueNzDZIF7cynLZt11NQZWvITwuZ";
+const generateToken = (userId) => {
+    const token = jwt.sign({ userId }, SECRET_KEY, { expiresIn: "48h" })
+    return token;
+}
 
-let opts = {
-    jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-    secretOrKey: process.env.secret_key,
-};
-
-passport.use(new JWTStrategy(opts, async function (jwtPayload, done) {
+const getUserIdFromToken = (token) => {
     try {
-        const admin = await Admin.findById(jwtPayload.id);
-        if (admin) {
-            return done(null, admin);
-        }
-
-        const user = await User.findById(jwtPayload.id);
-        if (user) {
-            return done(null, user);
-        }
-
-        return done(null, false);
-    } catch (err) {
-        console.log('Error:', err);
-        return done(err, false);
+        const decodedToken = jwt.verify(token, SECRET_KEY);
+        return decodedToken.userId;
+    } catch (error) {
+        console.error("Error verifying token:", error);
     }
-}));
-
-module.exports = passport;
+}
+module.exports = { generateToken, getUserIdFromToken };

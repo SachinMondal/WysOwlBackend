@@ -18,6 +18,10 @@ const questionSchema = new mongoose.Schema({
             }
         }
     ],
+    explanation: {
+        type: String,
+        required: true
+    },
     unitId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Unit'

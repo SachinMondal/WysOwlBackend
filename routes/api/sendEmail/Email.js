@@ -3,7 +3,7 @@ const router = express.Router();
 const nodemailer = require('nodemailer');
 const otp = require('../../../config/randomTop');
 const helper = require('../../../config/helper');
-let generatedOTP; // Declare a variable to store the OTP
+let generatedOTP;
 
 router.post('/otpUserRecognition', (req, res) => {
 
@@ -12,9 +12,9 @@ router.post('/otpUserRecognition', (req, res) => {
     helper.setGeneratedEmail(generatedEmail);
 
 
-    generatedOTP = otp.generateOTP(); // Store the generated OTP
+    generatedOTP = otp.generateOTP();
 
-    // Create a transporter with the necessary credentials
+
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 465,
@@ -30,7 +30,7 @@ router.post('/otpUserRecognition', (req, res) => {
         from: 'temporaysachin@gmail.com',
         to: to,
         subject: 'OTP User Recognition',
-        text: `Here's your OTP: ${generatedOTP}` // Use the stored OTP
+        text: `Here's your OTP: ${generatedOTP}`
     };
 
     // Send the email

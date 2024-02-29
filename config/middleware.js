@@ -1,33 +1,37 @@
-const jwt = require('jsonwebtoken');
-const Admin = require('../modals/AdminModal');
-const User = require('../modals/UserModal');
-exports.verifyToken = async (req, res, next) => {
-    console.log("Bearer Token: " + req.headers['authorization']);
-    let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-        token = req.headers.authorization.split(" ")[1];
-        console.log("Token : " + token);
-        req.token = token;
+const jwtProvider = require("../config/passport_jwt_stratergy");
+const User = require("../modals/UserModal");
+const Admin = require("../modals/AdminModal");
 
-    }
-    if (!token) {
-        console.log("token error");
-        return res.status(401).json({
-            success: false,
-            message: "unauthorized access token"
-        });
-    }
+const authenticate = async (req, res, next) => {
     try {
-        const decoded = await jwt.verify(token, 'secret');
-        console.log("decode token: " + JSON.stringify(decoded));
-        req.Admin = await Admin.findById(decoded.id);
-        req.User = await User.findById(decoded.id);
-        next();
-    } catch (err) {
-        console.log(err);
-        return res.status(401).json({
-            success: false,
-            message: "Unauthorized access"
-        });
+        const token = req.headers.authorization?.split(" ")[1];
+
+        if (!token) {
+            return res.status(404).send({ error: "Token not found" });
+        }
+
+        const userId = jwtProvider.getUserIdFromToken(token);
+
+        console.log("user", userId);
+
+        const user = await User.findById(userId);
+        if (user) {
+            req.user = user;
+            return next();
+        }
+
+
+        const admin = await Admin.findById(userId);
+        if (admin) {
+            req.user = admin;
+            return next();
+        }
+
+
+        return res.status(404).send({ error: "User or admin not found" });
+    } catch (error) {
+        return res.status(500).send({ error: error.message });
     }
-}
+};
+
+module.exports = authenticate;

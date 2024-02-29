@@ -1,111 +1,107 @@
-const bcrypt = require('bcrypt');
-const Admin = require('../modals/AdminModal');
-const jwt = require('jsonwebtoken');
+const jwtProvider = require("../config/passport_jwt_stratergy");
+const bcrypt = require("bcrypt");
+const Admin = require("../modals/AdminModal");
 
-module.exports.register = async function (req, res) {
-    console.log('register', req.body);
+const register = async (req, res) => {
     try {
-        const admin = await Admin.create(req.body);
+        const user = await Admin.create(req.body);
+        const jwt = jwtProvider.generateToken(user._id);
+
         return res.status(200).json({
             success: true,
-            message: 'Admin registration successful',
-            redirectTo: '/login' // Redirect URL
+            message: "Register success",
+            jwt: jwt
         });
-    } catch (err) {
-        return res.status(500).json({
-            success: false,
-            message: err.message
-        });
+    } catch (error) {
+
+        return res.status(500).send({ error: error.message });
     }
 }
-module.exports.login = async function (req, res) {
-    if (req.isAuthenticated()) {
-        return res.status(200).json({
-            success: true,
-            message: "Authenticated"
-        })
-    }
-    return res.status(500).json({
-        success: false,
-        message: "bye"
-    })
-}
-module.exports.create = async function (req, res) {
+
+const login = async (req, res) => {
     try {
-        let { Email, Password } = req.body;
-        if (!Email || !Password) {
+        let { Email, MobileNumber, Password } = req.body;
+        console.log(req.body);
+        if ((!Email && !MobileNumber) || !Password) {
             return res.status(400).json({
                 success: false,
-                message: "No email or password",
+                message: "No email/phone number or password provided",
+                statusCode: 400
             });
         }
-        const admin = await Admin.findOne({ Email: Email });
-        if (!admin) {
+
+        let user;
+        if (Email) {
+            user = await Admin.findOne({ Email: Email });
+        } else if (MobileNumber) {
+            user = await Admin.findOne({ MobileNumber: MobileNumber });
+        }
+        console.log(user);
+        if (!user) {
             return res.status(401).json({
                 success: false,
-                message: "User not found"
+                message: "Invalid Credentials",
+                statusCode: 401
             });
         }
-        const isMatch = await bcrypt.compare(Password, admin.Password);
-        console.log(isMatch);
-        const objectId = Admin._id;
-        if (!isMatch) {
-            return res.status(401).json({
-                success: false,
-                message: "invalid credentials"
-            });
+
+        const isPasswordValid = await bcrypt.compare(Password, user.Password);
+        console.log(Password);
+        console.log(user.Password);
+        if (!isPasswordValid) {
+            return res.status(401).send({ message: "Invalid Password..." });
         }
-        const token = admin.getSignedJwtToken();
-        console.log(token);
-        res.status(200).json({
-            success: true,
-            message: `Log in successfully ~ keep the token safe ${Admin.Name}`,
-            redirectTo: `/homepage/${objectId}`
-        });
-    } catch (err) {
-        console.log(err);
-        res.status(400).json({
-            success: false,
-            message: "Error Occured",
-        })
+
+        const jwt = jwtProvider.generateToken(user._id);
+
+
+
+        return res.status(200).send({ token: jwt, message: "Login success", success: true });
+    } catch (error) {
+        return res.status(500).send({ error: error.message });
     }
 }
-module.exports.createSession = async function (req, res) {
-    try {
 
-        return res.status(200).json({
-            success: true,
-            message: 'Session created and cookie set successfully'
-        });
-    } catch (err) {
-        return res.status(500).json({
-            success: false,
-            message: 'Error creating session'
-        });
-    }
-};
-
-module.exports.profile = async function (req, res) {
-    Admin.findById(req.params.id, function (err, Admin) {
+const logout = async function (req, res, next) {
+    req.logout(function (err) {
         if (err) {
-            console.log(err);
+            console.log('error', err);
+            return next(err);
         }
-        return res.render('user_profile', {
-            title: 'Admin Profile',
-            profile_user: Admin
 
-        });
-    });
-};
+    })
+    return res.status(200).json({
+        success: true,
+        message: `Successfully logout ~ ${req.Name}`
+    })
 
-module.exports.updatePassword = async function (req, res) {
+
+}
+
+const updateUser = async (req, res) => {
     try {
-        const { email, newPassword, newConfirmPassword } = req.body;
-
-        // Find the user by email (either Admin or User, as per your data structure)
-        const user = await Admin.findOne({ Email: email });
+        const userId = req.user._id;
+        const updates = req.body;
 
 
+        const updatedUser = await Admin.findByIdAndUpdate(userId, updates, { new: true });
+
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        return res.status(200).json({ success: true, message: "User updated successfully", user: updatedUser });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+
+const resetPassword = async function (req, res) {
+    try {
+        const { Email, newPassword, newConfirmPassword } = req.body;
+        const user = await Admin.findOne({ Email: Email });
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -113,7 +109,7 @@ module.exports.updatePassword = async function (req, res) {
             });
         }
 
-        // Check if the provided existing password matches the stored password
+
         const isMatch = (newPassword === newConfirmPassword)
         console.log(isMatch);
 
@@ -142,18 +138,6 @@ module.exports.updatePassword = async function (req, res) {
 
 
 
-module.exports.logout = async function (req, res, next) {
-    req.logout(function (err) {
-        if (err) {
-            console.log('error', err);
-            return next(err);
-        }
+module.exports = { register, login, logout, updateUser, resetPassword };
 
-    })
-    return res.status(200).json({
-        success: true,
-        message: 'Successfully logout'
-    })
-    // return res.redirect('/');
 
-}

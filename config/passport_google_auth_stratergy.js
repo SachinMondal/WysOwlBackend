@@ -7,7 +7,7 @@ const Admin = require('../modals/AdminModal');
 const User = require('../modals/UserModal');
 
 
-//passport using the google stratergy
+
 passport.use(new GoogleStratergy({
     clientID: process.env.Google_Client_id,
     clientSecret: process.env.Google_Client_Secreet,

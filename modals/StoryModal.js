@@ -5,9 +5,13 @@ const storySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    content: {
+        type: String,
+
+    },
     file: {
         data: Buffer,
-        contentType: String, // Store the content type of the file (e.g., 'video/mp4' or 'image/gif')
+        contentType: String,
         filename: String,
     },
     author: {

@@ -3,73 +3,37 @@ const router = express.Router();
 const passport = require('passport');
 const AdminController = require('../../../controller/AdminController');
 const AdminFunctions = require("../../../controller/AdminFunctions/AdminFeatures");
+const authenticate = require("../../../config/middleware");
 
-
-// router.get('/profile/:id', passport.checkAuthentication, AdminController.profile);
 
 router.post('/register', AdminController.register);
-router.get('/login', AdminController.login);
-router.post('/loggingin', AdminController.create);
 
-// router.post('/create', AdminController.create);
-router.post('/create-session', (req, res, next) => {
-    passport.authenticate('Admin-local', (err, admin, info) => {
-        if (err) {
-            return res.status(500).json({
-                success: false,
-                message: 'Internal server error'
-            });
-        }
-        if (!admin) {
+router.post('/loggingin', AdminController.login);
 
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid credentials'
-            });
-        }
-        req.logIn(admin, function (err) {
-            if (err) {
-                return res.status(500).json({
-                    success: false,
-                    message: 'Internal server error'
-                });
-            }
-            return res.status(200).json({
-                success: true,
-                message: 'Logged in successfully'
-            });
-        });
-    })(req, res, next);
-});
-
-
-// Use 'google' (all lowercase) as the strategy name
-router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/admin/login' }), AdminController.createSession);
-router.post('/forgotPassword',
-    // passport.authenticate('jwt', { session: false }), 
-    AdminController.updatePassword)
+router.post('/update', authenticate, AdminController.updateUser)
+router.post('/forgot-password', AdminController.resetPassword)
 
 
 
-////////////////////////////////////ADMIN FEATURES/////////////////////
+
 router.post('/createSection',
-    // passport.checkAuthentication,
-    AdminFunctions.uploadSection);
-router.post('/createGuide',
-    // passport.checkAuthentication, 
-    AdminFunctions.uploadGuideBook)
-router.post('/addnewquestion',
-    // passport.checkAuthentication,
-    AdminFunctions.uploadQuestion);
-router.post('/addnewunit',
-    // passport.checkAuthentication,
+    authenticate,
+    AdminFunctions.createSection);
+router.post('/addnewunit/:sectionId',
+    authenticate,
     AdminFunctions.uploadUnit);
-router.post('/addnewlevel',
-    // passport.checkAuthentication,
+router.post('/createGuide/:sectionId/:unitId',
+    authenticate,
+    AdminFunctions.uploadGuideBook)
+router.post('/addnewlevel/:sectionId/:unitId',
+    authenticate,
     AdminFunctions.newLevel);
+router.post('/addnewquestion/:sectionId/:unitId/:levelId',
+    authenticate,
+    AdminFunctions.uploadQuestion);
+
 router.post('/addnewstory',
-    // passport.checkAuthentication,
+    authenticate,
     AdminFunctions.uploadStory);
 
 

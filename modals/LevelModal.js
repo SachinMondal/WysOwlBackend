@@ -5,15 +5,15 @@ const levelSchema = new mongoose.Schema({
         required: true
     },
     adminId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Admin'
     },
     unitId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Unit'
     },
     sectionId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Section'
     }
 

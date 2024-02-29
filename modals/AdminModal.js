@@ -41,14 +41,14 @@ const adminSchema = new mongoose.Schema({
     }
 });
 
-// Encrypt password
+
 adminSchema.pre("save", async function (next) {
     const salt = await bcrypt.genSalt(10);
     this.Password = await bcrypt.hash(this.Password, salt);
     next();
 });
 
-// sign jwt and return 
+
 adminSchema.methods.getSignedJwtToken = function () {
     return jwt.sign({ id: this._id }, 'secret', {
         expiresIn: '120m'
@@ -56,8 +56,9 @@ adminSchema.methods.getSignedJwtToken = function () {
 };
 
 
-//we are using bcrypt library, another function of checking the password entered with the password in database
+
 adminSchema.methods.matchPassword = async function (enteredPassword) {
+
     return await bcrypt.compare(enteredPassword, this.Password);
 
 };

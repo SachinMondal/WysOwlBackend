@@ -3,65 +3,34 @@ const router = express.Router();
 const UserController = require('../../../controller/UserController');
 const UserFunction = require("../../../controller/UserFunctions/UserFeatures");
 const passport = require('passport');
+const authenticate = require("../../../config/middleware");
 
-// Import your StudentModal here
-const Student = require("../../../modals/UserModal");
 
-// Get student profile
-router.get('/profile/:id', passport.checkAuthentication, UserController.profile);
-
-// Student signup
 router.post('/register', UserController.register);
 
-// Create student
-router.post('/login', UserController.create);
+router.post('/login', UserController.login);
+router.post('/update', authenticate, UserController.updateUser);
 
-// Student login
-// router.post('/login', passport.authenticate('student-local'), (req, res) => {
-//     // This handler will be called after successful authentication
-//     // You can send a success JSON response or any other data
-//     res.json({ success: true, message: 'Login successful' });
-// });
-
-// Google authentication routes
-router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-router.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
-    // This handler will be called after successful authentication
-    // You can send a success JSON response or any other data
-    res.json({ success: true, message: 'Google authentication successful' });
-});
-
-// Update student information
-router.post('/update/:id', passport.checkAuthentication, UserController.update);
-
-// Logout student
 router.get('/logout', UserController.logout);
-
-// Handle authentication failure
-router.post('/login', (req, res) => {
-    // This handler will be called if authentication fails
-    // You can send an error JSON response or any other data
-    res.status(401).json({ success: false, message: 'Authentication failed' });
-});
+router.post('/forget-password', UserController.resetPassword);
 
 
-////////////////////USER FEATURES//////////////////////////////////
 router.get('/getALLSections',
-    // passport.checkAuthentication,
+    authenticate,
     UserFunction.getALLSections);
-router.post('/getALLUnits/:sectionId',
-    // passport.checkAuthentication,
+router.get('/getALLUnits/:sectionId',
+    authenticate,
     UserFunction.getALLUnitforParticularSection);
 
-router.post('/getALLGuides/:sectionId/:unitId',
-    // passport.checkAuthentication,
+router.get('/getALLGuides/:sectionId/:unitId',
+    authenticate,
     UserFunction.getGuidesForUnitAndSection);
 
-router.post('/getAllLevel/:sectionId/:unitId',
-    // passport.checkAuthentication,
+router.get('/getAllLevel/:sectionId/:unitId',
+    authenticate,
     UserFunction.getLevelForUnitAndSection);
-router.post('/getAllquestion/:sectionId/:unitId/:levelId',
-    // passport.checkAuthentication,
+router.get('/getAllquestion/:sectionId/:unitId/:levelId',
+    authenticate,
     UserFunction.getQuestionForSectionUnitAndLevel);
 
 

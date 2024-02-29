@@ -5,14 +5,14 @@ const passport = require('passport');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const passportLocal = require('./config/passport_layout_stratergy');
+
 const passportJwt = require('./config/passport_jwt_stratergy');
 const passportGoogle = require('./config/passport_google_auth_stratergy');
 const db = require('./config/mongoose');
 const MongoStore = require('connect-mongo')(session);
 
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:5176',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 }));
 // Use JSON and URL-encoded body parsing
@@ -46,8 +46,8 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Set authenticated user in locals middleware
-app.use(passport.setAuthenticatedUser);
+
+
 
 // Use routes
 app.use("/", require('./routes')); // Replace with your actual routes
